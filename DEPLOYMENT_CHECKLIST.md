@@ -63,11 +63,11 @@ After deployment:
    - **Start Command**: `npm start`
 5. Add Environment Variables (exact names):
    ```
-   TWILIO_ACCOUNT_SID=AC999a5b434a1dfc797b249eeaba388845
-   TWILIO_AUTH_TOKEN=01bc5d22c7cb2f1ad90b3e14fa96f53a
+   TWILIO_ACCOUNT_SID=your_twilio_account_sid_here
+   TWILIO_AUTH_TOKEN=your_twilio_auth_token_here
    TWILIO_PHONE=+18555573967
-   OPENAI_API_KEY=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
-   OWNER_PHONE=+14153740024
+   OPENAI_API_KEY=your_openai_api_key_here
+   OWNER_PHONE=+1your_verified_number
    CALENDAR_ID=primary
    GOOGLE_CREDS=PLACEHOLDER
    PORT=10000
@@ -84,7 +84,7 @@ Use your verified number for testing:
 curl -X POST "https://your-render-url.onrender.com/lead" \
   -H "Content-Type: application/json" \
   -d '{
-    "phone": "+14153740024",
+    "phone": "+1your_verified_number",
     "name": "Donte",
     "message": "I need a roof inspection"
   }'
