@@ -1,0 +1,20 @@
+{
+  "name": "primus-insights-roofing",
+  "version": "1.0.0",
+  "description": "AI follow-up and booking engine for roofing companies",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "twilio": "^4.20.0",
+    "openai": "^4.28.0",
+    "googleapis": "^131.0.0",
+    "dotenv": "^16.4.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.3"
+  }
+}
