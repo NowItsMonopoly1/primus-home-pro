@@ -1,0 +1,28 @@
+services:
+  - type: web
+    name: primus-home-pro
+    runtime: node
+    region: oregon
+    plan: free
+    rootDir: frontend
+    buildCommand: npm install && npx prisma generate && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        sync: false
+      - key: NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
+        sync: false
+      - key: CLERK_SECRET_KEY
+        sync: false
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: STRIPE_SECRET_KEY
+        sync: false
+      - key: STRIPE_PRICE_PRO
+        value: price_1SZ1ii05lmCbSdUDS1cX1OW8
+      - key: STRIPE_PRICE_AGENCY
+        value: price_1SZ1l005lmCbSdUDzc20PR2E
+      - key: NEXT_PUBLIC_APP_URL
+        sync: false
