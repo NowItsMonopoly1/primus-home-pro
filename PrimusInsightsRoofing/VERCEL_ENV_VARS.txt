@@ -1,0 +1,59 @@
+# COPY THESE TO VERCEL ENVIRONMENT VARIABLES
+# All should be set to "Production" environment
+
+# ============================================================================
+# DATABASE (from Vercel Postgres - Step 1)
+# ============================================================================
+DATABASE_URL=PASTE_YOUR_POSTGRES_URL_HERE
+
+# ============================================================================
+# CLERK AUTHENTICATION (PRODUCTION KEYS!)
+# ============================================================================
+# Get from: https://dashboard.clerk.com
+# Switch to PRODUCTION environment (top right toggle)
+# Go to API Keys
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_live_YOUR_KEY_HERE
+CLERK_SECRET_KEY=sk_live_YOUR_KEY_HERE
+CLERK_WEBHOOK_SECRET=whsec_YOUR_SECRET_HERE
+
+# ============================================================================
+# ANTHROPIC AI
+# ============================================================================
+# Get from: https://console.anthropic.com/account/keys
+ANTHROPIC_API_KEY=sk-ant-YOUR_KEY_HERE
+
+# ============================================================================
+# STRIPE - START WITH TEST MODE
+# ============================================================================
+# Use TEST keys first (sk_test_), switch to LIVE after testing
+# Get from: https://dashboard.stripe.com/test/apikeys
+STRIPE_SECRET_KEY=sk_test_YOUR_KEY_HERE
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_YOUR_KEY_HERE
+
+# Leave blank initially - we'll get this after creating webhook endpoint
+STRIPE_WEBHOOK_SECRET=
+
+# Your actual Price IDs (same for test and live)
+STRIPE_PRICE_PRO=price_1SZ1ii05lmCbSdUDS1cX1OW8
+STRIPE_PRICE_AGENCY=price_1SZ1l005lmCbSdUDzc20PR2E
+
+# ============================================================================
+# APPLICATION
+# ============================================================================
+# Update with your actual Vercel domain after first deploy
+NEXT_PUBLIC_APP_URL=https://primus-home-pro.vercel.app
+
+# ============================================================================
+# CRON SECURITY
+# ============================================================================
+# Generate with: openssl rand -base64 32
+# Or use any random string for now
+CRON_SECRET=your-random-production-secret-here
+
+# ============================================================================
+# OPTIONAL - Can add later
+# ============================================================================
+# TWILIO_ACCOUNT_SID=
+# TWILIO_AUTH_TOKEN=
+# TWILIO_PHONE_NUMBER=
+# RESEND_API_KEY=

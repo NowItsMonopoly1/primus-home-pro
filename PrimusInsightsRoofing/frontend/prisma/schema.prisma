@@ -1,0 +1,81 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Automation {
+  id        String   @id
+  userId    String
+  name      String
+  trigger   String
+  action    String
+  template  String
+  enabled   Boolean  @default(true)
+  config    Json?
+  createdAt DateTime @default(now())
+  updatedAt DateTime
+  User      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([enabled])
+  @@index([trigger])
+  @@index([userId])
+}
+
+model Lead {
+  id        String      @id
+  userId    String
+  name      String?
+  email     String?
+  phone     String?
+  source    String?
+  score     Int         @default(0)
+  stage     String      @default("New")
+  intent    String?
+  sentiment String?
+  notes     String?
+  metadata  Json?
+  createdAt DateTime    @default(now())
+  updatedAt DateTime
+  User      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  LeadEvent LeadEvent[]
+
+  @@index([createdAt])
+  @@index([score])
+  @@index([stage])
+  @@index([userId])
+}
+
+model LeadEvent {
+  id        String   @id
+  leadId    String
+  type      String
+  content   String?
+  metadata  Json?
+  createdAt DateTime @default(now())
+  Lead      Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
+
+  @@index([createdAt])
+  @@index([leadId])
+  @@index([type])
+}
+
+model User {
+  id                     String       @id
+  email                  String       @unique
+  name                   String?
+  clerkId                String       @unique
+  stripeCustomer         String?      @unique
+  subscriptionPlan       String?      @default("free")
+  subscriptionStatus     String?
+  subscriptionCurrentEnd DateTime?
+  createdAt              DateTime     @default(now())
+  updatedAt              DateTime
+  Automation             Automation[]
+  Lead                   Lead[]
+
+  @@index([clerkId])
+  @@index([email])
+}

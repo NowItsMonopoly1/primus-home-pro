@@ -1,9 +1,10 @@
 import type { Metadata } from 'next'
+import { ClerkProvider } from '@clerk/nextjs'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'PrimusHomePro - Roofing & Solar Solutions',
-  description: 'Professional roofing and solar installation services',
+  title: 'Primus Home Pro - AI-First Lead Generation',
+  description: 'The invisible CRM. AI-powered lead generation for home service professionals.',
 }
 
 export default function RootLayout({
@@ -12,8 +13,10 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en">
-      <body>{children}</body>
-    </html>
+    <ClerkProvider>
+      <html lang="en" suppressHydrationWarning>
+        <body>{children}</body>
+      </html>
+    </ClerkProvider>
   )
 }

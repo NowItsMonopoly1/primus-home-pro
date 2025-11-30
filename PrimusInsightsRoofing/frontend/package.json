@@ -9,14 +9,39 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@ai-sdk/anthropic": "^2.0.50",
+    "@anthropic-ai/sdk": "^0.71.0",
+    "@clerk/nextjs": "^6.35.5",
+    "@hookform/resolvers": "^5.2.2",
+    "@prisma/adapter-pg": "^7.0.1",
+    "@prisma/client": "^7.0.1",
+    "@stripe/stripe-js": "^8.5.3",
+    "@tailwindcss/postcss": "^4.1.17",
+    "@tanstack/react-table": "^8.21.3",
+    "ai": "^5.0.104",
+    "autoprefixer": "^10.4.22",
+    "clsx": "^2.1.1",
+    "lucide-react": "^0.555.0",
     "next": "^14.0.0",
+    "pg": "^8.16.3",
+    "postcss": "^8.5.6",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "react-hook-form": "^7.67.0",
+    "resend": "^6.5.2",
+    "stripe": "^20.0.0",
+    "svix": "^1.81.0",
+    "tailwind-merge": "^3.4.0",
+    "tailwindcss": "^4.1.17",
+    "twilio": "^5.10.6",
+    "zod": "^4.1.13"
   },
   "devDependencies": {
-    "@types/node": "^20.0.0",
+    "@types/node": "^20.19.25",
+    "@types/pg": "^8.15.6",
     "@types/react": "^18.2.0",
     "@types/react-dom": "^18.2.0",
+    "prisma": "^7.0.1",
     "typescript": "^5.3.0"
   }
 }
