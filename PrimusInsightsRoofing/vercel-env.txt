@@ -1,0 +1,19 @@
+# Copy and paste this entire content into Vercel's "Import .env" option
+
+# Database
+DATABASE_URL=postgresql://neondb_owner:npg_Xjexua5lO9zG@ep-sweet-cake-aflray7x-pooler.c-2.us-west-2.aws.neon.tech/neondb?connect_timeout=15&sslmode=require
+
+# Clerk - YOU NEED TO ADD YOUR KEYS HERE
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_REPLACE_WITH_YOUR_KEY
+CLERK_SECRET_KEY=sk_test_REPLACE_WITH_YOUR_KEY
+
+# Anthropic - YOU NEED TO ADD YOUR KEY HERE
+ANTHROPIC_API_KEY=sk-ant-REPLACE_WITH_YOUR_KEY
+
+# Stripe - YOU NEED TO ADD YOUR KEY HERE
+STRIPE_SECRET_KEY=sk_test_REPLACE_WITH_YOUR_KEY
+STRIPE_PRICE_PRO=price_1SZ1ii05lmCbSdUDS1cX1OW8
+STRIPE_PRICE_AGENCY=price_1SZ1l005lmCbSdUDzc20PR2E
+
+# App URL - Update after deployment
+NEXT_PUBLIC_APP_URL=https://primushomepro.vercel.app
