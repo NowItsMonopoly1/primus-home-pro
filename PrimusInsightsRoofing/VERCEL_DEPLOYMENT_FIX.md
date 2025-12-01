@@ -10,8 +10,7 @@ Vercel doesn't see your Next.js app because it's in a subdirectory (`frontend/`)
 2. Click on your **primus-home-pro-frontend** project
 3. Go to **Settings** → **General**
 4. Find **Root Directory**
-5. Change it from `.` to `frontend/PrimusInsightsRoofing/frontend`
-   - Or just `frontend` if the repo structure is different
+5. Change it to: **`frontend`** (this is where the Next.js app is)
 6. **Save**
 
 ### Step 2: Add Environment Variables
