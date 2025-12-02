@@ -3,27 +3,48 @@
 // PRIMUS HOME PRO - Lead Drawer Component
 // Detailed side panel view for lead management
 
-import { useState } from 'react'
+import { useState, useTransition } from 'react'
+import { useRouter } from 'next/navigation'
 import type { LeadWithMeta } from '@/types'
 import { updateLeadStage, addLeadNote } from '@/lib/actions/crm'
-import { X, Clock, BrainCircuit, Send, Mail, Phone } from 'lucide-react'
+import { createProjectFromLead } from '@/lib/actions/create-project'
+import { X, Clock, BrainCircuit, Send, Mail, Phone, HardHat, FileText } from 'lucide-react'
 import { ScoreBadge, IntentBadge, SentimentBadge } from './badges'
 import { Button } from '@/components/ui/button'
 import { AIActionPanel } from '@/components/ai/ai-action-panel'
 
 interface LeadDrawerProps {
-  lead: LeadWithMeta
+  lead: LeadWithMeta & { project?: { id: string } | null }
   onClose: () => void
 }
 
 export function LeadDrawer({ lead, onClose }: LeadDrawerProps) {
+  const router = useRouter()
   const [isUpdating, setIsUpdating] = useState(false)
   const [noteText, setNoteText] = useState('')
+  const [isPending, startTransition] = useTransition()
+
+  const isClosedWon = lead.stage === 'Closed Won' || lead.stage === 'Won' || lead.stage === 'Closed'
 
   async function handleStageChange(newStage: string) {
     setIsUpdating(true)
     await updateLeadStage(lead.id, newStage)
     setIsUpdating(false)
+  }
+
+  async function handleCreateProject() {
+    startTransition(async () => {
+      const result = await createProjectFromLead(lead.id)
+      if (result.success && result.projectId) {
+        router.push(`/dashboard/projects/${result.projectId}`)
+      }
+    })
+  }
+
+  async function handleGoToProject() {
+    if (lead.project?.id) {
+      router.push(`/dashboard/projects/${lead.project.id}`)
+    }
   }
 
   return (
@@ -115,7 +136,7 @@ export function LeadDrawer({ lead, onClose }: LeadDrawerProps) {
             Update Stage
           </h3>
           <div className="grid grid-cols-2 gap-2">
-            {['New', 'Contacted', 'Qualified', 'Closed'].map((stage) => (
+            {['New', 'Contacted', 'Qualified', 'Closed Won'].map((stage) => (
               <button
                 key={stage}
                 onClick={() => handleStageChange(stage)}
@@ -132,6 +153,44 @@ export function LeadDrawer({ lead, onClose }: LeadDrawerProps) {
           </div>
         </div>
 
+        {/* Project Actions - Show for Closed Won leads */}
+        {isClosedWon && (
+          <div className="mb-6 rounded-lg border border-green-200 bg-green-50 p-4">
+            <h3 className="mb-3 flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-green-700">
+              <HardHat className="h-4 w-4" /> Installation Project
+            </h3>
+            {lead.project ? (
+              <Button
+                onClick={handleGoToProject}
+                className="w-full bg-green-600 hover:bg-green-700"
+              >
+                <FileText className="mr-2 h-4 w-4" />
+                Go to Project Dashboard
+              </Button>
+            ) : (
+              <Button
+                onClick={handleCreateProject}
+                disabled={isPending}
+                className="w-full bg-green-600 hover:bg-green-700"
+              >
+                {isPending ? (
+                  <>Creating Project...</>
+                ) : (
+                  <>
+                    <HardHat className="mr-2 h-4 w-4" />
+                    Create Installation Project
+                  </>
+                )}
+              </Button>
+            )}
+            <p className="mt-2 text-xs text-green-600">
+              {lead.project 
+                ? 'Track milestones, permits, and installation progress'
+                : 'Auto-generates milestone checklist for permitting & installation'}
+            </p>
+          </div>
+        )}
+
         {/* Activity Timeline */}
         <div className="mb-6 space-y-4">
           <h3 className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
@@ -141,17 +200,25 @@ export function LeadDrawer({ lead, onClose }: LeadDrawerProps) {
             {lead.events.length === 0 ? (
               <p className="text-sm text-muted-foreground">No activity yet</p>
             ) : (
-              lead.events.map((event) => (
-                <div key={event.id} className="relative">
-                  <div className="absolute -left-[21px] top-1 h-2.5 w-2.5 rounded-full border border-border bg-background" />
-                  <p className="text-sm text-foreground">
-                    {event.content || event.type.replace(/_/g, ' ')}
-                  </p>
-                  <span className="text-[10px] text-muted-foreground">
-                    {new Date(event.createdAt).toLocaleString()}
-                  </span>
-                </div>
-              ))
+              lead.events.map((event) => {
+                const payload = event.payload as Record<string, unknown> | null
+                const eventIcon = getEventIcon(event.type, payload)
+                const eventText = getEventText(event.type, event.content, payload)
+                
+                return (
+                  <div key={event.id} className="relative">
+                    <div className={`absolute -left-[21px] top-1 flex h-5 w-5 items-center justify-center rounded-full text-[10px] ${getEventBgColor(event.type, payload)}`}>
+                      {eventIcon}
+                    </div>
+                    <p className="text-sm text-foreground pl-1">
+                      {eventText}
+                    </p>
+                    <span className="text-[10px] text-muted-foreground pl-1">
+                      {new Date(event.createdAt).toLocaleString()}
+                    </span>
+                  </div>
+                )
+              })
             )}
           </div>
         </div>
@@ -186,4 +253,70 @@ export function LeadDrawer({ lead, onClose }: LeadDrawerProps) {
       </aside>
     </div>
   )
+}
+
+// Helper functions for timeline display
+function getEventIcon(type: string, payload: Record<string, unknown> | null): string {
+  const action = payload?.action as string | undefined
+  
+  if (action === 'project_created') return '🏗️'
+  if (action === 'milestone_updated') {
+    return payload?.isComplete ? '✅' : '⏸️'
+  }
+  if (action === 'proposal_generated') return '📄'
+  if (action === 'proposal_accepted') return '✍️'
+  
+  switch (type) {
+    case 'STAGE_CHANGE': return '📊'
+    case 'NOTE_ADDED': return '📝'
+    case 'STATUS_UPDATE': return '🔄'
+    case 'EMAIL_SENT': return '📧'
+    case 'CALL_LOGGED': return '📞'
+    case 'SOLAR_ANALYSIS': return '☀️'
+    default: return '•'
+  }
+}
+
+function getEventBgColor(type: string, payload: Record<string, unknown> | null): string {
+  const action = payload?.action as string | undefined
+  
+  if (action === 'project_created') return 'bg-green-100'
+  if (action === 'milestone_updated') return 'bg-blue-100'
+  if (action === 'proposal_accepted') return 'bg-green-100'
+  
+  switch (type) {
+    case 'STAGE_CHANGE': return 'bg-purple-100'
+    case 'NOTE_ADDED': return 'bg-yellow-100'
+    case 'SOLAR_ANALYSIS': return 'bg-orange-100'
+    default: return 'bg-gray-100'
+  }
+}
+
+function getEventText(
+  type: string, 
+  content: string | null, 
+  payload: Record<string, unknown> | null
+): string {
+  if (content) return content
+  
+  const action = payload?.action as string | undefined
+  
+  if (action === 'project_created') {
+    return 'Installation project created'
+  }
+  if (action === 'milestone_updated') {
+    const name = payload?.milestoneName as string
+    const isComplete = payload?.isComplete as boolean
+    return isComplete 
+      ? `✓ Completed: ${name}` 
+      : `Reopened: ${name}`
+  }
+  if (action === 'proposal_generated') {
+    return 'Financial proposal generated'
+  }
+  if (action === 'proposal_accepted') {
+    return 'Contract signed and accepted!'
+  }
+  
+  return type.replace(/_/g, ' ')
 }

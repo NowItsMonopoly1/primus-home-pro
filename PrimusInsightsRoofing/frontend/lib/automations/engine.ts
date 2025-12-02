@@ -1,6 +1,6 @@
 // PRIMUS HOME PRO - Automation Engine
 // Triggers automated workflows based on lead events
-// Includes Solar Site Suitability integration
+// Includes Solar Site Suitability integration and Project Milestones
 
 import { prisma } from '@/lib/db/prisma'
 import { sendLeadReply } from '@/lib/actions/ai'
@@ -15,8 +15,41 @@ interface AutomationContext {
     siteSuitability?: string
     maxPanelsCount?: number
     systemSizeKW?: number
+    // Project/Milestone data
+    projectId?: string
+    milestoneName?: string
+    milestoneCategory?: string
+    projectStage?: string
   }
 }
+
+// Supported automation trigger types
+export const AUTOMATION_TRIGGERS = [
+  // Lead triggers
+  'lead.created',
+  'lead.updated',
+  'lead.stage_changed',
+  // Solar triggers
+  'solar.analyzed',
+  'solar.viable',
+  'solar.challenging',
+  // Proposal triggers
+  'proposal.generated',
+  'proposal.viewed',
+  'proposal.accepted',
+  // Project triggers
+  'project.created',
+  'project.stage_changed',
+  // Milestone triggers
+  'milestone.permit_submitted',
+  'milestone.permit_approved',
+  'milestone.installation_scheduled',
+  'milestone.installation_complete',
+  'milestone.inspection_passed',
+  'milestone.pto_received',
+] as const
+
+export type AutomationTrigger = typeof AUTOMATION_TRIGGERS[number]
 
 interface AutomationConfig {
   channel?: AIChannel
@@ -28,10 +61,14 @@ interface AutomationConfig {
     stageIn?: string[]
     siteSuitabilityIn?: ('VIABLE' | 'CHALLENGING' | 'NOT_VIABLE')[]
     solarEnriched?: boolean
+    projectStageIn?: string[]
+    milestoneCategoryIn?: string[]
   }
   actions?: {
     enrichSolar?: boolean  // Trigger solar enrichment
     notifyOnViable?: boolean  // Send notification for viable sites
+    sendCustomerUpdate?: boolean  // Send update to customer
+    createTask?: boolean  // Create internal task
   }
 }
 
@@ -94,8 +131,8 @@ export async function runAutomations(ctx: AutomationContext): Promise<void> {
     for (const automation of automations) {
       const config = (automation.config as AutomationConfig) || {}
 
-      // Check conditions (including solar conditions)
-      if (!checkConditions(lead, analysis, config.conditions)) {
+      // Check conditions (including solar and project conditions)
+      if (!checkConditions(lead, analysis, config.conditions, ctx)) {
         console.log(`[AUTO] Skipping "${automation.name}" - conditions not met`)
         continue
       }
@@ -205,7 +242,8 @@ export async function runAutomations(ctx: AutomationContext): Promise<void> {
 function checkConditions(
   lead: any,
   analysis: { intent: string; score: number; sentiment: string } | null,
-  conditions?: AutomationConfig['conditions']
+  conditions?: AutomationConfig['conditions'],
+  ctx?: AutomationContext
 ): boolean {
   if (!conditions) return true
 
@@ -241,6 +279,16 @@ function checkConditions(
   // Solar enriched check
   if (conditions.solarEnriched !== undefined) {
     if (lead.solarEnriched !== conditions.solarEnriched) return false
+  }
+
+  // Project stage matching
+  if (conditions.projectStageIn && conditions.projectStageIn.length > 0 && ctx?.data?.projectStage) {
+    if (!conditions.projectStageIn.includes(ctx.data.projectStage)) return false
+  }
+
+  // Milestone category matching
+  if (conditions.milestoneCategoryIn && conditions.milestoneCategoryIn.length > 0 && ctx?.data?.milestoneCategory) {
+    if (!conditions.milestoneCategoryIn.includes(ctx.data.milestoneCategory)) return false
   }
 
   return true

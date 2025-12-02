@@ -9,19 +9,6 @@ import { Button } from '@/components/ui/button'
 import { Inbox, Mail, MessageSquare, Bell } from 'lucide-react'
 import Link from 'next/link'
 
-interface MessageWithLead {
-  id: string
-  type: string
-  content: string
-  createdAt: Date
-  lead: {
-    id: string
-    name: string | null
-    email: string | null
-    phone: string | null
-  }
-}
-
 export default async function InboxPage() {
   const { userId: clerkUserId } = await auth()
 
@@ -58,9 +45,9 @@ export default async function InboxPage() {
 
   const stats = {
     unread: recentMessages.length,
-    emails: recentMessages.filter((m: MessageWithLead) => m.type === 'EMAIL_RECEIVED').length,
-    sms: recentMessages.filter((m: MessageWithLead) => m.type === 'SMS_RECEIVED').length,
-    forms: recentMessages.filter((m: MessageWithLead) => m.type === 'FORM_SUBMIT').length,
+    emails: recentMessages.filter((m) => m.type === 'EMAIL_RECEIVED').length,
+    sms: recentMessages.filter((m) => m.type === 'SMS_RECEIVED').length,
+    forms: recentMessages.filter((m) => m.type === 'FORM_SUBMIT').length,
   }
 
   return (
@@ -143,7 +130,7 @@ export default async function InboxPage() {
             </div>
           ) : (
             <div className="space-y-4">
-              {recentMessages.map((message: MessageWithLead) => (
+              {recentMessages.map((message) => (
                 <div
                   key={message.id}
                   className="flex items-start gap-4 rounded-lg border border-border p-4 transition-colors hover:bg-muted/50"

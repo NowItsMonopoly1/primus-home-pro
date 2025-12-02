@@ -3,7 +3,7 @@
 
 import { UserButton } from '@clerk/nextjs'
 import Link from 'next/link'
-import { LayoutDashboard, Users, Inbox, Settings, Zap, CreditCard } from 'lucide-react'
+import { LayoutDashboard, Users, Inbox, Settings, Zap, CreditCard, HardHat } from 'lucide-react'
 
 export default function DashboardLayout({
   children,
@@ -34,6 +34,13 @@ export default function DashboardLayout({
               >
                 <Users className="h-4 w-4" />
                 Leads
+              </Link>
+              <Link
+                href="/dashboard/projects"
+                className="flex items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+              >
+                <HardHat className="h-4 w-4" />
+                Projects
               </Link>
               <Link
                 href="/dashboard/automations"

@@ -17,7 +17,7 @@ model Automation {
   config    Json?
   createdAt DateTime @default(now())
   updatedAt DateTime
-  User      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([enabled])
   @@index([trigger])
@@ -52,10 +52,11 @@ model Lead {
   // Relations
   siteSurvey  SiteSurvey?
   proposals   Proposal[]
+  project     Project?    // Installation project (created when lead closes)
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
-  User        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  LeadEvent   LeadEvent[]
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  events      LeadEvent[]
 
   @@index([createdAt])
   @@index([score])
@@ -120,8 +121,9 @@ model LeadEvent {
   type      String
   content   String?
   metadata  Json?
+  payload   Json?
   createdAt DateTime @default(now())
-  Lead      Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  lead      Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
 
   @@index([createdAt])
   @@index([leadId])
@@ -189,7 +191,7 @@ model Proposal {
   ipAddress             String?   // IP address at signing (for audit)
   
   // Relations
-  Lead                  Lead      @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  lead                  Lead      @relation(fields: [leadId], references: [id], onDelete: Cascade)
   
   @@index([leadId])
   @@index([status])
@@ -197,8 +199,148 @@ model Proposal {
   @@index([accessToken])
 }
 
+// ============================================================================
+// PROJECT - Installation Project Management (Module J)
+// ============================================================================
+
+model Project {
+  id                    String              @id @default(cuid())
+  leadId                String              @unique // One project per closed sale
+  
+  // Project Status
+  currentStage          String              @default("Engineering") // Engineering, Permitting, Scheduling, Installation, Inspection, PTO
+  status                String              @default("active") // active, on_hold, completed, cancelled
+  
+  // Timeline
+  contractSignedAt      DateTime?           // When the proposal was accepted
+  targetCompletionDate  DateTime?           // Expected PTO date
+  actualCompletionDate  DateTime?           // When PTO was achieved
+  
+  // Installation Details
+  installerAssigned     String?             // Name/ID of installation crew
+  installationDate      DateTime?           // Scheduled installation date
+  inspectionDate        DateTime?           // Scheduled inspection date
+  
+  // Permit Information
+  permitNumber          String?             // AHJ permit number
+  permitSubmittedAt     DateTime?
+  permitApprovedAt      DateTime?
+  
+  // Utility Interconnection
+  utilityApplicationId  String?             // Utility company application ID
+  utilitySubmittedAt    DateTime?
+  utilityApprovedAt     DateTime?
+  ptoGrantedAt          DateTime?           // Permission to Operate date
+  
+  // HOA (if applicable)
+  hoaRequired           Boolean             @default(false)
+  hoaSubmittedAt        DateTime?
+  hoaApprovedAt         DateTime?
+  
+  // Notes & Metadata
+  notes                 String?             @db.Text
+  metadata              Json?
+  
+  // Timestamps
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
+  
+  // Relations
+  lead                  Lead                @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  milestones            ProjectMilestone[]
+  documents             ProjectDocument[]
+  
+  @@index([currentStage])
+  @@index([status])
+  @@index([installerAssigned])
+  @@index([targetCompletionDate])
+}
+
+// Standard milestones for solar installation projects
+model ProjectMilestone {
+  id                    String      @id @default(cuid())
+  projectId             String
+  
+  // Milestone Definition
+  name                  String      // e.g., "Site Survey Complete", "Permit Approved"
+  description           String?     // Detailed description
+  category              String      // Engineering, Permitting, Installation, Inspection
+  sortOrder             Int         @default(0) // Display order
+  
+  // Status
+  isComplete            Boolean     @default(false)
+  completedAt           DateTime?
+  completedBy           String?     // User who marked complete
+  
+  // Dependencies
+  dependsOn             String?     // ID of milestone that must complete first
+  blockedReason         String?     // If blocked, why
+  
+  // Due Date
+  dueDate               DateTime?
+  isOverdue             Boolean     @default(false)
+  
+  // Automation
+  automationTriggered   Boolean     @default(false) // Has automation fired for this milestone
+  
+  // Timestamps
+  createdAt             DateTime    @default(now())
+  updatedAt             DateTime    @updatedAt
+  
+  // Relations
+  project               Project     @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  
+  @@index([projectId])
+  @@index([category])
+  @@index([isComplete])
+  @@index([dueDate])
+}
+
+// Document vault for project paperwork
+model ProjectDocument {
+  id                    String      @id @default(cuid())
+  projectId             String
+  
+  // Document Info
+  name                  String      // Display name
+  documentType          String      // Contract, Permit, UtilityApp, HOAApproval, Inspection, Engineering, BOM
+  description           String?
+  
+  // File Storage
+  fileUrl               String      // URL to stored file (S3, Vercel Blob, etc.)
+  fileName              String      // Original filename
+  fileSize              Int?        // Size in bytes
+  mimeType              String?     // e.g., application/pdf
+  
+  // Status
+  status                String      @default("pending") // pending, approved, rejected, expired
+  isApproved            Boolean     @default(false)
+  approvedAt            DateTime?
+  approvedBy            String?     // User who approved
+  rejectionReason       String?
+  
+  // Expiration (for permits, insurance, etc.)
+  expiresAt             DateTime?
+  
+  // Metadata
+  uploadedBy            String?     // User who uploaded
+  notes                 String?
+  metadata              Json?
+  
+  // Timestamps
+  createdAt             DateTime    @default(now())
+  updatedAt             DateTime    @updatedAt
+  
+  // Relations
+  project               Project     @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  
+  @@index([projectId])
+  @@index([documentType])
+  @@index([status])
+}
+
 model User {
-  id                     String       @id
+  id                     String       @id @default(cuid())
   email                  String       @unique
   name                   String?
   clerkId                String       @unique
@@ -207,9 +349,9 @@ model User {
   subscriptionStatus     String?
   subscriptionCurrentEnd DateTime?
   createdAt              DateTime     @default(now())
-  updatedAt              DateTime
-  Automation             Automation[]
-  Lead                   Lead[]
+  updatedAt              DateTime     @updatedAt
+  automations            Automation[]
+  leads                  Lead[]
 
   @@index([clerkId])
   @@index([email])

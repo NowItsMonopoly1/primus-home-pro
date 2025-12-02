@@ -16,6 +16,9 @@ export async function getLeadsForUser(userId: string): Promise<LeadWithMeta[]> {
         orderBy: { createdAt: 'desc' },
         take: 10,
       },
+      project: {
+        select: { id: true },
+      },
     },
     orderBy: { createdAt: 'desc' },
   })
@@ -43,6 +46,9 @@ export async function getLeadById(leadId: string): Promise<LeadWithMeta | null> 
     include: {
       events: {
         orderBy: { createdAt: 'desc' },
+      },
+      project: {
+        select: { id: true },
       },
     },
   })
