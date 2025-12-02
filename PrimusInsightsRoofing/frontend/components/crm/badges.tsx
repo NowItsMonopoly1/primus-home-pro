@@ -72,3 +72,37 @@ export function SentimentBadge({ sentiment }: { sentiment: string }) {
     </span>
   )
 }
+
+export function SolarBadge({ suitability }: { suitability: string }) {
+  const config: Record<string, { color: string; label: string; icon: string }> = {
+    VIABLE: {
+      color: 'bg-green-500/10 text-green-600 border-green-500/20',
+      label: 'Viable',
+      icon: '☀️',
+    },
+    CHALLENGING: {
+      color: 'bg-yellow-500/10 text-yellow-600 border-yellow-500/20',
+      label: 'Challenging',
+      icon: '🌤️',
+    },
+    NOT_VIABLE: {
+      color: 'bg-red-500/10 text-red-600 border-red-500/20',
+      label: 'Not Viable',
+      icon: '☁️',
+    },
+  }
+
+  const { color, label, icon } = config[suitability] || config.NOT_VIABLE
+
+  return (
+    <span
+      className={cn(
+        'inline-flex items-center gap-1 rounded-md border px-2 py-1 text-xs font-medium',
+        color
+      )}
+    >
+      <span>{icon}</span>
+      <span>{label}</span>
+    </span>
+  )
+}

@@ -1,7 +1,7 @@
 'use client'
 
 // PRIMUS HOME PRO - Leads Table Component
-// Interactive data grid with TanStack Table
+// Interactive data grid with TanStack Table (Solar-enhanced)
 
 import { useState } from 'react'
 import {
@@ -12,7 +12,7 @@ import {
 } from '@tanstack/react-table'
 import type { LeadWithMeta } from '@/types'
 import { LeadDrawer } from './lead-drawer'
-import { ScoreBadge, IntentBadge, StageBadge } from './badges'
+import { ScoreBadge, IntentBadge, StageBadge, SolarBadge } from './badges'
 
 interface LeadsTableProps {
   initialLeads: LeadWithMeta[]
@@ -47,6 +47,15 @@ export function LeadsTable({ initialLeads }: LeadsTableProps) {
       header: 'Stage',
       accessorKey: 'stage',
       cell: ({ row }) => <StageBadge stage={row.original.stage} />,
+    },
+    {
+      header: 'Solar',
+      accessorKey: 'siteSuitability',
+      cell: ({ row }) => {
+        const lead = row.original as LeadWithMeta & { siteSuitability?: string; solarEnriched?: boolean }
+        if (!lead.solarEnriched) return <span className="text-xs text-muted-foreground">—</span>
+        return <SolarBadge suitability={lead.siteSuitability || 'NOT_VIABLE'} />
+      },
     },
     {
       header: 'Source',
