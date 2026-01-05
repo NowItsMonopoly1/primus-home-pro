@@ -321,10 +321,15 @@ Response: TechnicianStatus
 ### Design System Requirements
 
 **Typography:**
-- Headings: Bold, 1.5-2rem
-- Body: Regular, 0.95-1rem
-- Captions: 0.85rem
-- Monospace: Event logs, IDs
+- H1 (Page Title): Bold, 2rem (32px)
+- H2 (Section): Bold, 1.5rem (24px)
+- H3 (Subsection): Semibold, 1.25rem (20px)
+- H4 (Card Title): Semibold, 1.125rem (18px)
+- Body Large: Regular, 1rem (16px)
+- Body: Regular, 0.875rem (14px)
+- Body Small: Regular, 0.75rem (12px)
+- Caption: Regular, 0.625rem (10px)
+- Monospace: Regular, 0.875rem (14px) - Event logs, IDs
 
 **Spacing:**
 - Base unit: 8px
