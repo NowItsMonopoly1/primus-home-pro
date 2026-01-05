@@ -10,9 +10,9 @@ interface LayoutProps {
 
 export const Layout: React.FC<LayoutProps> = ({ children, activeView, onViewChange }) => {
   return (
-    <div className="h-screen flex flex-col bg-slate-900 text-slate-100">
+    <div className="h-screen w-full flex flex-col bg-slate-900 text-slate-100 overflow-hidden">
       {/* Precision Command Header */}
-      <header className="h-16 border-b border-slate-700/50 px-4 md:px-8 flex items-center justify-between shrink-0 bg-slate-800">
+      <header className="h-14 md:h-16 border-b border-slate-700/50 px-4 md:px-8 flex items-center justify-between shrink-0 bg-slate-800">
         <div className="flex items-center gap-4 md:gap-8">
           <div className="flex items-center gap-2">
             <Zap size={20} className="text-[#007AFF] fill-current" />

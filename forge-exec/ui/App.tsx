@@ -56,11 +56,11 @@ const App: React.FC = () => {
         )}
 
         {/* Technical Status Overlay */}
-        <div className={`fixed bottom-10 left-10 z-[110] transition-opacity duration-200 ${
+        <div className={`fixed bottom-24 left-4 md:left-10 z-[110] transition-opacity duration-200 ${
           kernelMessage ? 'opacity-100' : 'opacity-0 pointer-events-none'
         }`}>
           {kernelMessage && (
-            <div className={`px-4 py-2 border-l-4 flex items-center gap-3 bg-slate-800 text-slate-100 shadow-2xl ${
+            <div className={`px-3 py-2 border-l-4 flex items-center gap-2 bg-slate-800 text-slate-100 shadow-2xl ${
               kernelMessage.type === 'success' ? 'border-[#0A84FF]' : 'border-red-600'
             }`}>
               <Terminal size={14} className={kernelMessage.type === 'success' ? 'text-[#0A84FF]' : 'text-red-600'} />

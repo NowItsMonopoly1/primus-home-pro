@@ -75,7 +75,7 @@ export const TechnicianApp: React.FC<TechAppProps> = ({ jobs, onEvent }) => {
     return (
       <div className="h-full bg-slate-900 flex flex-col md:flex-row overflow-hidden">
         {/* Detail Rail */}
-        <div className="flex flex-col w-full md:w-1/2 lg:w-2/5 xl:w-1/3 border-r border-slate-700/50 overflow-y-auto no-scrollbar pb-32 md:pb-0">
+        <div className="flex flex-col w-full md:w-1/2 lg:w-2/5 xl:w-1/3 border-r border-slate-700/50 overflow-y-auto no-scrollbar pb-6 md:pb-0">
           <header className="h-16 border-b border-slate-700/50 px-6 flex items-center justify-between sticky top-0 bg-slate-800 z-20">
             <button 
               onClick={() => { setSelectedJob(null); setCodeResult(null); setSupplyResult(null); }} 
@@ -89,7 +89,7 @@ export const TechnicianApp: React.FC<TechAppProps> = ({ jobs, onEvent }) => {
 
           <div className="p-6 md:p-10 space-y-10">
             <div className="space-y-4">
-              <h1 className="text-[32px] md:text-[44px] font-black leading-none uppercase tracking-tighter text-white">
+              <h1 className="text-[28px] md:text-[40px] font-black leading-none uppercase tracking-tighter text-white">
                 {selectedJob.customerName}
               </h1>
               <div className="grid grid-cols-2 border border-white/10">
@@ -203,12 +203,12 @@ export const TechnicianApp: React.FC<TechAppProps> = ({ jobs, onEvent }) => {
   }
 
   return (
-    <div className="h-full flex flex-col bg-slate-900 overflow-hidden">
-      <div className="px-6 md:px-12 py-10 md:py-16 border-b border-slate-700/30">
+    <div className="h-full flex flex-col bg-slate-900">
+      <div className="px-4 md:px-12 py-6 md:py-12 border-b border-slate-700/30 shrink-0">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
           <div className="space-y-3">
             <p className="text-[#007AFF] font-mono font-black text-[10px] uppercase tracking-[0.4em]">OPERATIONAL_FEED_PRO</p>
-            <h1 className="text-[48px] md:text-[80px] font-black text-slate-100 leading-[0.85] uppercase tracking-tighter">
+            <h1 className="text-[36px] md:text-[64px] font-black text-slate-100 leading-[0.85] uppercase tracking-tighter">
               {activeTab === 'jobs' && 'Site_Queue'}
               {activeTab === 'map' && 'GPS_Atlas'}
               {activeTab === 'profile' && 'Operator'}
@@ -229,7 +229,7 @@ export const TechnicianApp: React.FC<TechAppProps> = ({ jobs, onEvent }) => {
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto no-scrollbar pb-32">
+      <div className="flex-1 overflow-y-auto no-scrollbar pb-28">
         {activeTab === 'jobs' && (
           <div className="max-w-7xl mx-auto px-4 md:px-6">
             {/* Queue Controls */}
@@ -699,7 +699,7 @@ export const TechnicianApp: React.FC<TechAppProps> = ({ jobs, onEvent }) => {
         )}
       </div>
 
-      <nav className="h-24 bg-slate-800 border-t border-slate-700/50 fixed bottom-0 left-0 right-0 px-8 md:px-24 flex justify-between items-center z-20">
+      <nav className="h-20 bg-slate-800 border-t border-slate-700/50 fixed bottom-0 left-0 right-0 px-4 md:px-16 flex justify-around md:justify-between items-center z-30 safe-area-inset-bottom">
         {[
           { id: 'jobs', icon: ClipboardList, label: 'QUEUE' },
           { id: 'map', icon: MapIcon, label: 'ATLAS' },
@@ -713,8 +713,8 @@ export const TechnicianApp: React.FC<TechAppProps> = ({ jobs, onEvent }) => {
               activeTab === tab.id ? 'text-[#007AFF]' : 'text-slate-400 hover:text-slate-300'
             }`}
           >
-            <tab.icon size={26} strokeWidth={2.5} />
-            <span className="text-[10px] font-black uppercase tracking-[0.3em]">{tab.label}</span>
+            <tab.icon size={22} strokeWidth={2.5} className="mb-1" />
+            <span className="text-[9px] font-black uppercase tracking-[0.2em]">{tab.label}</span>
           </button>
         ))}
       </nav>
