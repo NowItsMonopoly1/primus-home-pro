@@ -1,0 +1,117 @@
+{
+  "forbidden": [
+    {
+      "name": "no-executor-to-verticals",
+      "comment": "Executor CANNOT import from verticals - this violates vertical isolation",
+      "severity": "error",
+      "from": {
+        "path": "^executor/"
+      },
+      "to": {
+        "path": "^verticals/"
+      }
+    },
+    {
+      "name": "no-executor-to-adapters",
+      "comment": "Executor CANNOT import from adapters - adapters are output-only",
+      "severity": "error",
+      "from": {
+        "path": "^executor/"
+      },
+      "to": {
+        "path": "^adapters/",
+        "pathNot": "^adapters/adapter-registry\\.ts$"
+      }
+    },
+    {
+      "name": "no-adapters-to-executor",
+      "comment": "Adapters CANNOT import from executor - adapters are side-effect sinks only",
+      "severity": "error",
+      "from": {
+        "path": "^adapters/"
+      },
+      "to": {
+        "path": "^executor/"
+      }
+    },
+    {
+      "name": "no-adapters-to-verticals",
+      "comment": "Adapters CANNOT import from verticals - adapters are reusable across verticals",
+      "severity": "error",
+      "from": {
+        "path": "^adapters/"
+      },
+      "to": {
+        "path": "^verticals/"
+      }
+    },
+    {
+      "name": "no-kernel-modifications",
+      "comment": "Kernel interface CANNOT be imported for modification - it is read-only",
+      "severity": "error",
+      "from": {},
+      "to": {
+        "path": "^kernel-client/interface\\.ts$",
+        "dependencyTypes": ["local"],
+        "moreUnstable": true
+      }
+    },
+    {
+      "name": "no-forbidden-zones",
+      "comment": "NO files may exist in forbidden zones (utils, helpers, shared, common, lib)",
+      "severity": "error",
+      "from": {},
+      "to": {
+        "path": "^(utils|helpers|shared|common|lib)/"
+      }
+    },
+    {
+      "name": "verticals-may-only-import-from-core",
+      "comment": "Verticals may only import from executor (types), adapters (registry), and kernel-client",
+      "severity": "error",
+      "from": {
+        "path": "^verticals/",
+        "pathNot": "\\.spec\\.ts$"
+      },
+      "to": {
+        "pathNot": "^(verticals|executor|adapters|kernel-client)/"
+      }
+    },
+    {
+      "name": "no-vertical-cross-imports",
+      "comment": "Verticals CANNOT import from other verticals - each vertical is isolated (except tests)",
+      "severity": "error",
+      "from": {
+        "path": "^verticals/([^/]+)/",
+        "pathNot": "\\.spec\\.ts$"
+      },
+      "to": {
+        "path": "^verticals/(?!\\1)[^/]+/"
+      }
+    }
+  ],
+  "options": {
+    "doNotFollow": {
+      "path": "node_modules"
+    },
+    "tsPreCompilationDeps": true,
+    "tsConfig": {
+      "fileName": "tsconfig.json"
+    },
+    "enhancedResolveOptions": {
+      "exportsFields": ["exports"],
+      "conditionNames": ["import", "require", "node", "default"]
+    },
+    "reporterOptions": {
+      "dot": {
+        "collapsePattern": "^(node_modules|packages/.+/node_modules)/[^/]+"
+      },
+      "archi": {
+        "collapsePattern": "^(node_modules|packages/.+/node_modules)/[^/]+"
+      },
+      "text": {
+        "highlightFocused": true
+      }
+    }
+  }
+}
