@@ -1,0 +1,8 @@
+{
+  "name": "ForgeExec - Next Level Electric",
+  "description": "A deterministic execution engine UI for trade-specific workflows. Includes a field technician mobile interface and a high-density office dashboard for monitoring and approvals.",
+  "requestFramePermissions": [
+    "camera",
+    "geolocation"
+  ]
+}
