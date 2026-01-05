@@ -1,0 +1,40 @@
+{
+  "name": "forge-exec",
+  "version": "1.0.0",
+  "description": "Vertical execution engine for trade-specific workflows",
+  "type": "module",
+  "scripts": {
+    "type-check": "tsc --noEmit",
+    "validate-arch": "dependency-cruiser --validate .dependency-cruiser.json executor adapters verticals kernel-client",
+    "validate": "npm run type-check && npm run validate-arch",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:ui": "vitest --ui",
+    "demo:job-flow": "tsx examples/automated-job-flow.ts",
+    "demo:cli": "tsx examples/cli-event-source.ts",
+    "demo:init": "tsx examples/nle-initialization.ts",
+    "test:field": "tsx examples/field-test.ts",
+    "api:start": "node api-server.js",
+    "api:dev": "node --watch api-server.js"
+  },
+  "keywords": [
+    "vertical-saas",
+    "execution-engine",
+    "trade-workflows"
+  ],
+  "author": "",
+  "license": "PROPRIETARY",
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@vitest/coverage-v8": "^4.0.16",
+    "@vitest/ui": "^4.0.16",
+    "dependency-cruiser": "^16.0.0",
+    "tsx": "^4.21.0",
+    "typescript": "^5.3.0",
+    "vitest": "^4.0.16"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.22.1"
+  }
+}
