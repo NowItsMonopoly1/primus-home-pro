@@ -10,6 +10,9 @@ import cors from 'cors';
 import { Executor } from './executor/executor.js';
 import { createMockKernel } from './kernel-client/mock-kernel.js';
 import { wireNLEAdapters } from './verticals/next-level-electric/adapter-wiring.js';
+import { createAdapterRegistry } from './adapters/adapter-registry.js';
+import { executeDailyExport, verifyExportConfiguration, getExportStats } from './adapters/export/daily-export.js';
+import { getExport } from './adapters/export/file-storage.js';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -20,7 +23,8 @@ app.use(express.json());
 
 // Initialize ForgeExec
 const kernel = createMockKernel();
-const adapterRegistry = wireNLEAdapters();
+const adapterRegistry = createAdapterRegistry();
+wireNLEAdapters(adapterRegistry);
 const executor = new Executor(kernel, adapterRegistry);
 
 // In-memory job store (replace with database in production)
@@ -229,7 +233,7 @@ app.get('/', (req, res) => {
  * Health check endpoint
  */
 app.get('/health', (req, res) => {
-  res.json({ 
+  res.json({
     status: 'healthy',
     service: 'ForgeExec API',
     version: '1.0.0',
@@ -237,9 +241,148 @@ app.get('/health', (req, res) => {
   });
 });
 
+/**
+ * POST /api/export/daily
+ * Trigger daily export manually or via scheduler
+ */
+app.post('/api/export/daily', async (req, res) => {
+  try {
+    // Load export configuration
+    const exportConfig = loadExportConfig();
+
+    // Get all jobs
+    const jobList = Array.from(jobs.values());
+
+    // Get export date (from request or default to today)
+    const exportDate = req.body.date ? new Date(req.body.date) : new Date();
+
+    // Execute export
+    const result = await executeDailyExport(exportConfig, jobList, exportDate);
+
+    if (result.success) {
+      res.json({
+        success: true,
+        message: 'Daily export completed successfully',
+        ...result
+      });
+    } else {
+      res.status(500).json({
+        success: false,
+        message: 'Daily export completed with errors',
+        ...result
+      });
+    }
+
+  } catch (error) {
+    console.error('Daily export error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Daily export failed',
+      error: error.message
+    });
+  }
+});
+
+/**
+ * GET /api/export/verify
+ * Verify export configuration
+ */
+app.get('/api/export/verify', async (req, res) => {
+  try {
+    const exportConfig = loadExportConfig();
+    const result = await verifyExportConfiguration(exportConfig);
+
+    res.json(result);
+
+  } catch (error) {
+    console.error('Export verification error:', error);
+    res.status(500).json({
+      valid: false,
+      error: error.message
+    });
+  }
+});
+
+/**
+ * GET /api/export/stats
+ * Get export statistics
+ */
+app.get('/api/export/stats', async (req, res) => {
+  try {
+    const exportConfig = loadExportConfig();
+    const stats = await getExportStats(exportConfig, {
+      limit: parseInt(req.query.limit) || 30
+    });
+
+    res.json(stats);
+
+  } catch (error) {
+    console.error('Export stats error:', error);
+    res.status(500).json({
+      error: error.message
+    });
+  }
+});
+
+/**
+ * GET /api/export/:date
+ * Get a specific export by date
+ */
+app.get('/api/export/:date', async (req, res) => {
+  try {
+    const exportConfig = loadExportConfig();
+    const exportData = await getExport(exportConfig.fileStorage, req.params.date);
+
+    res.json(exportData);
+
+  } catch (error) {
+    if (error.message.includes('not found')) {
+      res.status(404).json({ error: error.message });
+    } else {
+      res.status(500).json({ error: error.message });
+    }
+  }
+});
+
+/**
+ * Load export configuration from file or environment.
+ */
+function loadExportConfig() {
+  // Default configuration (can be overridden by config file)
+  return {
+    fileStorage: {
+      enabled: true,
+      baseDir: process.env.EXPORT_DIR || './exports'
+    },
+    email: {
+      enabled: process.env.EMAIL_ENABLED === 'true',
+      host: process.env.SMTP_HOST || 'smtp.gmail.com',
+      port: parseInt(process.env.SMTP_PORT) || 587,
+      user: process.env.SMTP_USER || '',
+      pass: process.env.SMTP_PASS || '',
+      from: process.env.SMTP_FROM || 'noreply@nextlevelelectric.com',
+      to: (process.env.SMTP_TO || '').split(',').filter(e => e.length > 0)
+    },
+    cloud: {
+      enabled: process.env.CLOUD_ENABLED === 'true',
+      type: process.env.CLOUD_TYPE || 'onedrive',
+      accessToken: process.env.CLOUD_ACCESS_TOKEN || '',
+      siteId: process.env.CLOUD_SITE_ID || '',
+      driveId: process.env.CLOUD_DRIVE_ID || '',
+      folderPath: process.env.CLOUD_FOLDER_PATH || 'ForgeExec/Exports'
+    }
+  };
+}
+
 // Start server
 app.listen(PORT, () => {
   console.log(`ForgeExec API Server running on http://localhost:${PORT}`);
   console.log(`Jobs loaded: ${jobs.size}`);
   console.log(`Health check: http://localhost:${PORT}/health`);
+  console.log(`Daily export: POST http://localhost:${PORT}/api/export/daily`);
 });
+
+// Keep the process alive
+setInterval(() => {
+  // Periodic health check
+}, 30000);

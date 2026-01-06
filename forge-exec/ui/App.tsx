@@ -6,7 +6,7 @@ import { TechnicianApp } from './components/Technician/TechnicianApp';
 import { JobDetails, JobState, ExecutionEvent } from './types';
 import { MOCK_JOBS } from './constants';
 import { validateKernelEvent } from './services/forgeexecService';
-import { Loader2, AlertCircle, CheckCircle2, Terminal } from 'lucide-react';
+import { Loader2, AlertCircle, CheckCircle2 } from 'lucide-react';
 
 const App: React.FC = () => {
   const [activeView, setActiveView] = useState<'technician' | 'office'>('technician');
@@ -55,28 +55,34 @@ const App: React.FC = () => {
           <Overview jobs={jobs} onSelectJob={(job) => console.log('REQ_JOB_DET:', job)} />
         )}
 
-        {/* Technical Status Overlay */}
+        {/* Status Message */}
         <div className={`fixed bottom-24 left-4 md:left-10 z-[110] transition-opacity duration-200 ${
           kernelMessage ? 'opacity-100' : 'opacity-0 pointer-events-none'
         }`}>
           {kernelMessage && (
-            <div className={`px-3 py-2 border-l-4 flex items-center gap-2 bg-slate-800 text-slate-100 shadow-2xl ${
-              kernelMessage.type === 'success' ? 'border-[#0A84FF]' : 'border-red-600'
+            <div className={`px-4 py-3 rounded-lg flex items-center gap-3 shadow-2xl ${
+              kernelMessage.type === 'success'
+                ? 'bg-green-600 text-white'
+                : 'bg-red-600 text-white'
             }`}>
-              <Terminal size={14} className={kernelMessage.type === 'success' ? 'text-[#0A84FF]' : 'text-red-600'} />
-              <span className="font-mono text-[11px] font-bold uppercase tracking-tight">{kernelMessage.text}</span>
+              {kernelMessage.type === 'success' ? (
+                <CheckCircle2 size={18} className="text-white" />
+              ) : (
+                <AlertCircle size={18} className="text-white" />
+              )}
+              <span className="text-sm font-semibold">{kernelMessage.text}</span>
             </div>
           )}
         </div>
 
-        {/* System Processing Overlay */}
+        {/* Loading Overlay */}
         {isProcessing && (
-          <div className="fixed inset-0 bg-white/90 z-[100] flex items-center justify-center">
-            <div className="flex flex-col items-center gap-6">
-              <div className="w-10 h-10 border-4 border-black border-t-transparent animate-spin"></div>
+          <div className="fixed inset-0 bg-white/95 z-[100] flex items-center justify-center backdrop-blur-sm">
+            <div className="flex flex-col items-center gap-4">
+              <Loader2 size={40} className="text-blue-600 animate-spin" />
               <div className="text-center">
-                <p className="font-black text-[14px] uppercase tracking-widest text-black">KERNEL_VALIDATING...</p>
-                <p className="text-slate-400 font-mono text-[10px] mt-1 tracking-widest">TRANSACTION_PROTOCOL_IN_PROGRESS</p>
+                <p className="font-bold text-lg text-slate-900">Updating job status...</p>
+                <p className="text-slate-500 text-sm mt-1">Please wait</p>
               </div>
             </div>
           </div>

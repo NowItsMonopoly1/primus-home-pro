@@ -11,54 +11,62 @@ interface JobCardProps {
 
 export const JobCard: React.FC<JobCardProps> = ({ job, onSelect }) => {
   const isEmergency = job.priority === Priority.EMERGENCY;
+  const isHighPriority = job.priority === Priority.HIGH;
 
   return (
-    <div 
+    <div
       onClick={() => onSelect(job)}
-      className={`border-b border-slate-700/30 p-5 md:p-8 bg-slate-900 hover:bg-slate-800 active:bg-slate-700 cursor-pointer group flex items-center justify-between transition-none`}
+      className={`border-b border-slate-700/30 p-4 md:p-6 bg-slate-900 hover:bg-slate-800 active:bg-slate-700 cursor-pointer group flex items-center justify-between transition-colors ${
+        isEmergency ? 'border-l-4 border-l-red-500' : ''
+      }`}
     >
-      <div className="flex-1 min-w-0 space-y-4">
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="flex items-center gap-1 text-[10px] font-mono font-bold text-white/30">
-            <Hash size={10} />
+      <div className="flex-1 min-w-0 space-y-3">
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="flex items-center gap-1.5 text-xs font-semibold text-white/40">
+            <Hash size={12} />
             <span>{job.jobId}</span>
           </div>
-          <span className={`text-[9px] font-black px-2 py-0.5 border uppercase tracking-[0.15em] ${STATE_COLORS[job.currentState].replace('border-', 'border-').replace('text-', 'text-')}`}>
+          <span className={`text-xs font-semibold px-2 py-0.5 rounded ${STATE_COLORS[job.currentState].replace('border-', 'bg-').replace('text-', 'text-')}`}>
             {job.currentState.replace('_', ' ')}
           </span>
           {isEmergency && (
-            <span className="text-[9px] font-black px-2 py-0.5 bg-red-600 text-white uppercase tracking-[0.15em]">
-              EMERGENCY_REQUIRED
+            <span className="text-xs font-bold px-2 py-0.5 bg-red-600 text-white rounded">
+              🚨 Emergency
+            </span>
+          )}
+          {!isEmergency && isHighPriority && (
+            <span className="text-xs font-bold px-2 py-0.5 bg-orange-600 text-white rounded">
+              High Priority
             </span>
           )}
         </div>
 
         <div>
-          <h3 className="text-[20px] md:text-[24px] font-black text-white uppercase tracking-tighter truncate">
+          <h3 className="text-xl md:text-2xl font-bold text-white truncate">
             {job.customerName}
           </h3>
-          <div className="flex items-center gap-2 text-[12px] md:text-[14px] font-bold text-white/40 uppercase mt-1">
-            <MapPin size={14} className="text-[#007AFF] shrink-0" />
+          <div className="flex items-center gap-2 text-sm text-white/50 mt-1">
+            <MapPin size={14} className="text-blue-400 shrink-0" />
             <span className="truncate">{job.address}</span>
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-6">
-          <div className="flex items-center gap-2 text-white/30">
+        <div className="flex flex-wrap items-center gap-4">
+          <div className="flex items-center gap-2 text-white/40">
             <Clock size={16} />
-            <span className="text-[12px] font-bold font-mono uppercase">
-              ETD_{new Date(job.scheduledTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })}
+            <span className="text-sm font-medium">
+              {new Date(job.scheduledTime).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}
             </span>
           </div>
-          <div className="flex items-center gap-2 text-[#007AFF]">
+          <div className="flex items-center gap-2 text-blue-400">
             <Navigation size={16} />
-            <span className="text-[12px] font-black uppercase">3.2 MILES_SITE_DIST</span>
+            <span className="text-sm font-semibold">3.2 miles</span>
           </div>
         </div>
       </div>
 
-      <div className="pl-4 text-white/20 group-hover:text-white">
-        <ChevronRight size={28} strokeWidth={1} />
+      <div className="pl-4 text-white/20 group-hover:text-white transition-colors">
+        <ChevronRight size={24} strokeWidth={2} />
       </div>
     </div>
   );

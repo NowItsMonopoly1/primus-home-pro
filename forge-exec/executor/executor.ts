@@ -133,3 +133,31 @@ export function acknowledgeOutputs(
 ): ExecutionState {
   return clearPendingOutputs(state)
 }
+
+/**
+ * Class-based wrapper for the functional executor API.
+ * Provides the interface expected by api-server.js
+ */
+export class Executor {
+  constructor(
+    private kernel: KernelInterface,
+    private adapterRegistry: any // TODO: Type this properly
+  ) {}
+
+  async execute(event: Readonly<ExecutionEvent>, jobContext: Readonly<JobContext>) {
+    // Get current state from somewhere - this needs to be passed in or stored
+    // For now, create a minimal state
+    const currentState: ExecutionState = {
+      jobId: jobContext.jobId,
+      currentState: jobContext.currentState,
+      history: [],
+      pendingOutputs: []
+    }
+
+    const config: ExecutorConfig = {
+      kernel: this.kernel
+    }
+
+    return await executeEvent(config, currentState, event, jobContext)
+  }
+}

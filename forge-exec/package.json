@@ -15,7 +15,10 @@
     "demo:init": "tsx examples/nle-initialization.ts",
     "test:field": "tsx examples/field-test.ts",
     "api:start": "node api-server.js",
-    "api:dev": "node --watch api-server.js"
+    "api:dev": "node --watch api-server.js",
+    "scheduler:start": "node scheduler/daily-export-scheduler.js",
+    "export:now": "curl -X POST http://localhost:3000/api/export/daily",
+    "export:verify": "curl http://localhost:3000/api/export/verify"
   },
   "keywords": [
     "vertical-saas",
@@ -35,6 +38,10 @@
   },
   "dependencies": {
     "cors": "^2.8.5",
-    "express": "^4.22.1"
+    "express": "^4.22.1",
+    "node-cron": "^3.0.3",
+    "node-fetch": "^3.3.2",
+    "nodemailer": "^6.9.7",
+    "pdfkit": "^0.15.0"
   }
 }

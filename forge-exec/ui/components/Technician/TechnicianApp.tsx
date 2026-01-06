@@ -77,93 +77,101 @@ export const TechnicianApp: React.FC<TechAppProps> = ({ jobs, onEvent }) => {
         {/* Detail Rail */}
         <div className="flex flex-col w-full md:w-1/2 lg:w-2/5 xl:w-1/3 border-r border-slate-700/50 overflow-y-auto no-scrollbar pb-6 md:pb-0">
           <header className="h-16 border-b border-slate-700/50 px-6 flex items-center justify-between sticky top-0 bg-slate-800 z-20">
-            <button 
-              onClick={() => { setSelectedJob(null); setCodeResult(null); setSupplyResult(null); }} 
-              className="flex items-center gap-2 font-black text-[10px] uppercase tracking-[0.2em] text-white/60 hover:text-white"
+            <button
+              onClick={() => { setSelectedJob(null); setCodeResult(null); setSupplyResult(null); }}
+              className="flex items-center gap-2 font-semibold text-sm text-white/70 hover:text-white transition-colors"
             >
-              <ChevronLeft size={18} />
-              EXIT_JOB
+              <ChevronLeft size={20} />
+              Back to Jobs
             </button>
-            <span className="text-[10px] font-mono font-bold text-[#007AFF] uppercase">{selectedJob.jobId}</span>
+            <span className="text-xs font-semibold text-blue-400">{selectedJob.jobId}</span>
           </header>
 
           <div className="p-6 md:p-10 space-y-10">
             <div className="space-y-4">
-              <h1 className="text-[28px] md:text-[40px] font-black leading-none uppercase tracking-tighter text-white">
+              <h1 className="text-3xl md:text-4xl font-bold leading-tight text-white">
                 {selectedJob.customerName}
               </h1>
-              <div className="grid grid-cols-2 border border-white/10">
-                <div className="p-5 border-r border-white/10">
-                  <p className="text-[9px] font-black text-white/30 uppercase tracking-widest mb-1">State_Status</p>
-                  <p className="text-[13px] font-bold uppercase">{selectedJob.currentState.replace('_', ' ')}</p>
+              <div className="grid grid-cols-2 border border-white/10 rounded-lg overflow-hidden">
+                <div className="p-4 border-r border-white/10">
+                  <p className="text-xs font-semibold text-white/40 uppercase mb-1">Job Status</p>
+                  <p className="text-sm font-bold">{selectedJob.currentState.replace('_', ' ')}</p>
                 </div>
-                <div className="p-5">
-                  <p className="text-[9px] font-black text-white/30 uppercase tracking-widest mb-1">Impact_Lv</p>
-                  <p className={`text-[13px] font-bold uppercase ${selectedJob.priority === Priority.EMERGENCY ? 'text-red-500' : 'text-white'}`}>
-                    {selectedJob.priority}
+                <div className="p-4">
+                  <p className="text-xs font-semibold text-white/40 uppercase mb-1">Priority</p>
+                  <p className={`text-sm font-bold ${selectedJob.priority === Priority.EMERGENCY ? 'text-red-400' : 'text-white'}`}>
+                    {selectedJob.priority === Priority.EMERGENCY ? '🚨 Emergency' :
+                     selectedJob.priority === Priority.HIGH ? 'High' :
+                     selectedJob.priority === Priority.MEDIUM ? 'Normal' : 'Low'}
                   </p>
                 </div>
               </div>
             </div>
 
             <div className="space-y-4">
-              <h4 className="text-[10px] font-black text-white/20 uppercase tracking-[0.3em]">Site_Logistics</h4>
-              <div className="grid grid-cols-3 gap-1">
-                <button onClick={handleNECSearch} disabled={aiLoading} className="flex flex-col items-center justify-center p-6 border border-white/10 bg-white/5 hover:bg-white/10 disabled:opacity-20">
-                  <SearchIcon size={20} />
-                  <span className="text-[9px] font-black uppercase mt-3 tracking-widest">NEC_REF</span>
+              <h4 className="text-xs font-semibold text-white/40 uppercase">Quick Actions</h4>
+              <div className="grid grid-cols-3 gap-2">
+                <button onClick={handleNECSearch} disabled={aiLoading} className="flex flex-col items-center justify-center p-5 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 disabled:opacity-40 transition-colors">
+                  <SearchIcon size={22} />
+                  <span className="text-xs font-bold mt-2">Check Code</span>
                 </button>
-                <button onClick={handleFindSupplies} disabled={aiLoading} className="flex flex-col items-center justify-center p-6 border border-white/10 bg-white/5 hover:bg-white/10 disabled:opacity-20">
-                  <ShoppingCart size={20} />
-                  <span className="text-[9px] font-black uppercase mt-3 tracking-widest">SUPPLY</span>
+                <button onClick={handleFindSupplies} disabled={aiLoading} className="flex flex-col items-center justify-center p-5 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 disabled:opacity-40 transition-colors">
+                  <ShoppingCart size={22} />
+                  <span className="text-xs font-bold mt-2">Find Parts</span>
                 </button>
-                <button className="flex flex-col items-center justify-center p-6 border border-white/10 bg-white/5 hover:bg-white/10">
-                  <Phone size={20} />
-                  <span className="text-[9px] font-black uppercase mt-3 tracking-widest">COORD</span>
+                <button className="flex flex-col items-center justify-center p-5 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 transition-colors">
+                  <Phone size={22} />
+                  <span className="text-xs font-bold mt-2">Call Office</span>
                 </button>
               </div>
             </div>
 
             <div className="space-y-4">
-              <h4 className="text-[10px] font-black text-white/20 uppercase tracking-[0.3em]">Technical_Briefing</h4>
-              <div className="bg-zinc-900 p-6 border-l-4 border-white font-mono text-sm text-zinc-300 leading-relaxed italic">
-                "{selectedJob.notes}"
+              <h4 className="text-xs font-semibold text-white/40 uppercase">Job Notes</h4>
+              <div className="bg-zinc-900 p-5 rounded-lg border-l-4 border-blue-500 text-sm text-zinc-300 leading-relaxed">
+                {selectedJob.notes}
               </div>
             </div>
 
-            {/* Mobile/Small Tablet Action Bar (Only visible if not on large screen or as part of the flow) */}
+            {/* Mobile/Small Tablet Action Bar */}
             <div className="md:hidden space-y-4 pt-6">
-              <h4 className="text-[10px] font-black text-white/20 uppercase tracking-[0.3em]">Execution_Protocol</h4>
+              <h4 className="text-xs font-semibold text-white/40 uppercase">Next Step</h4>
               {selectedJob.currentState === JobState.SCHEDULED && (
-                <button onClick={() => onEvent('TECHNICIAN_DISPATCHED', { jobId: selectedJob.jobId })} className="w-full bg-white text-black py-5 font-black uppercase tracking-[0.3em] text-xs">INITIATE_DISPATCH</button>
+                <button onClick={() => onEvent('TECHNICIAN_DISPATCHED', { jobId: selectedJob.jobId })} className="w-full bg-white text-black py-4 px-6 rounded-lg font-bold text-sm hover:bg-gray-100 transition-colors">
+                  Head to Job
+                </button>
               )}
               {selectedJob.currentState === JobState.DISPATCHED && (
-                <button onClick={() => onEvent('TECHNICIAN_ARRIVED', { jobId: selectedJob.jobId })} className="w-full bg-[#007AFF] text-white py-5 font-black uppercase tracking-[0.3em] text-xs">CONFIRM_ARRIVAL</button>
+                <button onClick={() => onEvent('TECHNICIAN_ARRIVED', { jobId: selectedJob.jobId })} className="w-full bg-blue-600 text-white py-4 px-6 rounded-lg font-bold text-sm hover:bg-blue-700 transition-colors">
+                  I'm Here
+                </button>
               )}
               {selectedJob.currentState === JobState.ON_SITE && (
-                <button onClick={() => onEvent('WORK_COMPLETED', { jobId: selectedJob.jobId })} className="w-full bg-emerald-600 text-white py-5 font-black uppercase tracking-[0.3em] text-xs">FINAL_SIGNOFF</button>
+                <button onClick={() => onEvent('WORK_COMPLETED', { jobId: selectedJob.jobId })} className="w-full bg-green-600 text-white py-4 px-6 rounded-lg font-bold text-sm hover:bg-green-700 transition-colors">
+                  Mark Complete
+                </button>
               )}
             </div>
           </div>
         </div>
 
-        {/* Intelligence Canvas (Tablet/Desktop) */}
+        {/* Code & Parts Lookup */}
         <div className="flex-1 flex flex-col bg-zinc-950 overflow-y-auto no-scrollbar">
            {(codeResult || supplyResult || aiLoading) ? (
-             <div className="p-10 md:p-16 max-w-3xl">
-                <div className="flex items-center gap-4 mb-10">
-                  <Sparkles size={32} className="text-[#007AFF]" />
-                  <h2 className="text-[24px] md:text-[32px] font-black uppercase tracking-tight">Kernel_Intelligence_Node</h2>
+             <div className="p-8 md:p-12 max-w-3xl">
+                <div className="flex items-center gap-3 mb-8">
+                  <Sparkles size={28} className="text-blue-500" />
+                  <h2 className="text-2xl md:text-3xl font-bold">Code & Parts Lookup</h2>
                 </div>
                 {aiLoading ? (
-                   <div className="space-y-8">
-                     <div className="h-5 w-full bg-white/5 animate-pulse"></div>
-                     <div className="h-5 w-4/5 bg-white/5 animate-pulse"></div>
-                     <div className="h-5 w-2/3 bg-white/5 animate-pulse"></div>
+                   <div className="space-y-6">
+                     <div className="h-4 w-full bg-white/5 animate-pulse rounded"></div>
+                     <div className="h-4 w-4/5 bg-white/5 animate-pulse rounded"></div>
+                     <div className="h-4 w-2/3 bg-white/5 animate-pulse rounded"></div>
                    </div>
                 ) : (
-                  <div className="space-y-10">
-                    <div className="text-[18px] md:text-[22px] leading-relaxed text-zinc-400 font-medium">
+                  <div className="space-y-8">
+                    <div className="text-base md:text-lg leading-relaxed text-zinc-300">
                       {codeResult?.text || supplyResult?.text}
                     </div>
                     <GroundingResults sources={codeResult?.sources || supplyResult?.sources || []} type={codeResult ? 'web' : 'maps'} />
@@ -171,28 +179,34 @@ export const TechnicianApp: React.FC<TechAppProps> = ({ jobs, onEvent }) => {
                 )}
              </div>
            ) : (
-             <div className="flex-1 flex flex-col items-center justify-center p-10 text-center opacity-20 space-y-6">
-                <Activity size={120} strokeWidth={0.5} />
-                <p className="text-[10px] font-black uppercase tracking-[0.5em]">SYSTEM_READY_FOR_INPUT</p>
+             <div className="flex-1 flex flex-col items-center justify-center p-10 text-center opacity-30 space-y-4">
+                <Activity size={80} strokeWidth={1} className="text-zinc-600" />
+                <p className="text-sm text-zinc-500">Click "Check Code" or "Find Parts" to search</p>
              </div>
            )}
 
            {/* Desktop Action Bar */}
-           <div className="hidden md:block mt-auto p-10 border-t border-white/5 bg-black">
+           <div className="hidden md:block mt-auto p-8 border-t border-white/5 bg-black">
               <div className="flex items-center justify-between gap-6">
                 <div className="flex-1 space-y-1">
-                  <p className="text-[9px] font-black text-white/20 uppercase tracking-widest">Active_Protocol</p>
-                  <p className="text-[11px] font-bold uppercase text-zinc-500">Current Phase: {selectedJob.currentState.replace('_', ' ')}</p>
+                  <p className="text-xs font-semibold text-white/40 uppercase">Current Step</p>
+                  <p className="text-sm font-medium text-zinc-400">{selectedJob.currentState.replace('_', ' ')}</p>
                 </div>
-                <div className="flex gap-4">
+                <div className="flex gap-3">
                   {selectedJob.currentState === JobState.SCHEDULED && (
-                    <button onClick={() => onEvent('TECHNICIAN_DISPATCHED', { jobId: selectedJob.jobId })} className="px-10 py-4 bg-white text-black font-black uppercase tracking-[0.3em] text-xs">EXEC_DISPATCH</button>
+                    <button onClick={() => onEvent('TECHNICIAN_DISPATCHED', { jobId: selectedJob.jobId })} className="px-8 py-3 bg-white text-black font-bold text-sm rounded-lg hover:bg-gray-100 transition-colors">
+                      Head to Job
+                    </button>
                   )}
                   {selectedJob.currentState === JobState.DISPATCHED && (
-                    <button onClick={() => onEvent('TECHNICIAN_ARRIVED', { jobId: selectedJob.jobId })} className="px-10 py-4 bg-[#007AFF] text-white font-black uppercase tracking-[0.3em] text-xs">CONFIRM_SITE</button>
+                    <button onClick={() => onEvent('TECHNICIAN_ARRIVED', { jobId: selectedJob.jobId })} className="px-8 py-3 bg-blue-600 text-white font-bold text-sm rounded-lg hover:bg-blue-700 transition-colors">
+                      I'm Here
+                    </button>
                   )}
                   {selectedJob.currentState === JobState.ON_SITE && (
-                    <button onClick={() => onEvent('WORK_COMPLETED', { jobId: selectedJob.jobId })} className="px-10 py-4 bg-emerald-600 text-white font-black uppercase tracking-[0.3em] text-xs">FINAL_SIGNOFF</button>
+                    <button onClick={() => onEvent('WORK_COMPLETED', { jobId: selectedJob.jobId })} className="px-8 py-3 bg-green-600 text-white font-bold text-sm rounded-lg hover:bg-green-700 transition-colors">
+                      Mark Complete
+                    </button>
                   )}
                 </div>
               </div>
@@ -204,27 +218,29 @@ export const TechnicianApp: React.FC<TechAppProps> = ({ jobs, onEvent }) => {
 
   return (
     <div className="h-full flex flex-col bg-slate-900">
-      <div className="px-4 md:px-12 py-6 md:py-12 border-b border-slate-700/30 shrink-0">
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
-          <div className="space-y-3">
-            <p className="text-[#007AFF] font-mono font-black text-[10px] uppercase tracking-[0.4em]">OPERATIONAL_FEED_PRO</p>
-            <h1 className="text-[36px] md:text-[64px] font-black text-slate-100 leading-[0.85] uppercase tracking-tighter">
-              {activeTab === 'jobs' && 'Site_Queue'}
-              {activeTab === 'map' && 'GPS_Atlas'}
-              {activeTab === 'profile' && 'Operator'}
-              {activeTab === 'settings' && 'System'}
+      <div className="px-4 md:px-12 py-6 md:py-10 border-b border-slate-700/30 shrink-0">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+          <div className="space-y-2">
+            <p className="text-blue-500 font-semibold text-sm">Next Level Electric</p>
+            <h1 className="text-4xl md:text-5xl font-bold text-slate-100 leading-tight">
+              {activeTab === 'jobs' && 'Today\'s Jobs'}
+              {activeTab === 'map' && 'Map & Routes'}
+              {activeTab === 'capture' && 'Photos & Materials'}
+              {activeTab === 'orders' && 'Change Orders'}
             </h1>
           </div>
-          <button 
+          <button
             onClick={() => {
               setIsClockedIn(!isClockedIn);
               onEvent(isClockedIn ? 'TECHNICIAN_CLOCKED_OUT' : 'TECHNICIAN_CLOCKED_IN', { techId: 'Tech-01' });
             }}
-            className={`px-12 py-5 font-black text-[13px] uppercase tracking-[0.2em] border-2 transition-none ${
-              isClockedIn ? 'border-red-600 text-red-600' : 'bg-white text-black border-white'
+            className={`px-8 py-3 rounded-lg font-bold text-sm transition-colors ${
+              isClockedIn
+                ? 'bg-red-600 text-white hover:bg-red-700'
+                : 'bg-green-600 text-white hover:bg-green-700'
             }`}
           >
-            {isClockedIn ? 'OFF_DUTY' : 'ON_DUTY'}
+            {isClockedIn ? 'Clock Out' : 'Clock In'}
           </button>
         </div>
       </div>
@@ -701,20 +717,20 @@ export const TechnicianApp: React.FC<TechAppProps> = ({ jobs, onEvent }) => {
 
       <nav className="h-20 bg-slate-800 border-t border-slate-700/50 fixed bottom-0 left-0 right-0 px-4 md:px-16 flex justify-around md:justify-between items-center z-30 safe-area-inset-bottom">
         {[
-          { id: 'jobs', icon: ClipboardList, label: 'QUEUE' },
-          { id: 'map', icon: MapIcon, label: 'ATLAS' },
-          { id: 'capture', icon: Camera, label: 'CAPTURE' },
-          { id: 'orders', icon: FileText, label: 'ORDERS' },
+          { id: 'jobs', icon: ClipboardList, label: 'Jobs' },
+          { id: 'map', icon: MapIcon, label: 'Map' },
+          { id: 'capture', icon: Camera, label: 'Photos' },
+          { id: 'orders', icon: FileText, label: 'Orders' },
         ].map(tab => (
-          <button 
+          <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`flex flex-col items-center gap-2 transition-none ${
-              activeTab === tab.id ? 'text-[#007AFF]' : 'text-slate-400 hover:text-slate-300'
+            className={`flex flex-col items-center gap-1.5 transition-colors ${
+              activeTab === tab.id ? 'text-blue-500' : 'text-slate-400 hover:text-slate-300'
             }`}
           >
-            <tab.icon size={22} strokeWidth={2.5} className="mb-1" />
-            <span className="text-[9px] font-black uppercase tracking-[0.2em]">{tab.label}</span>
+            <tab.icon size={24} strokeWidth={2} />
+            <span className="text-xs font-semibold">{tab.label}</span>
           </button>
         ))}
       </nav>

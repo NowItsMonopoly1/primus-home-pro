@@ -1,0 +1,4 @@
+Export Date,Job ID,Customer Name,Customer ID,Customer Phone,Address,Job Type,Current State,Assigned Technician,Scheduled Time,Estimated Duration (min),Total Labor Hours,Total Material Cost,Priority,Notes,Photos Count,Voice Notes Count,Materials Used Count,Change Orders Count
+2026-01-06,JOB-001,Alice Johnson,CUST-001,555-0123,"123 Pine St, San Francisco, CA",PANEL_UPGRADE,SCHEDULED,TECH-001,2026-01-04T09:00:00Z,240,0,0,HIGH,Main panel upgrade required,0,0,0,0
+2026-01-06,JOB-002,Bob Smith,CUST-002,555-9876,"456 Oak Rd, Oakland, CA",EV_CHARGER_INSTALL,WORK_COMPLETED,TECH-001,2026-01-04T13:30:00Z,120,3.5,575,MEDIUM,Tesla Wall Connector installation,2,0,2,0
+2026-01-06,JOB-003,Charlie Davis,CUST-003,555-4433,"789 Maple Ave, San Jose, CA",SERVICE_CALL,INVOICED,TECH-002,2026-01-04T10:00:00Z,60,1.5,15,EMERGENCY,Partial power loss in kitchen - breaker replaced,2,0,1,0

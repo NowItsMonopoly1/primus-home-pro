@@ -1,15 +1,17 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
 } from 'recharts';
 import { 
   Briefcase, Clock, CheckCircle, TrendingUp, Search, Filter, 
-  ChevronRight, Activity, BrainCircuit, Sparkles, Hash
+  ChevronRight, Activity, BrainCircuit, Sparkles, Hash, Download,
+  Cloud, Mail, HardDrive, AlertTriangle, CheckCircle2, XCircle
 } from 'lucide-react';
 import { JobDetails, JobState } from '../../types';
 import { STATE_COLORS } from '../../constants';
 import { analyzeJobComplexity } from '../../services/geminiService';
+import { triggerDailyExport, verifyExportConfiguration, getExportStats } from '../../services/forgeexecService';
 
 interface OverviewProps {
   jobs: JobDetails[];
@@ -28,11 +30,85 @@ export const Overview: React.FC<OverviewProps> = ({ jobs, onSelectJob }) => {
   const [analysisLoading, setAnalysisLoading] = useState(false);
   const [analysisText, setAnalysisText] = useState<string | null>(null);
 
+  // Export system state
+  const [exportStatus, setExportStatus] = useState<{
+    configured: boolean;
+    emailEnabled: boolean;
+    cloudEnabled: boolean;
+    localEnabled: boolean;
+    lastExport?: string;
+    nextScheduled?: string;
+  } | null>(null);
+  const [exportStats, setExportStats] = useState<{
+    totalExports: number;
+    lastExportDate?: string;
+    successRate: number;
+    recentExports: Array<{
+      date: string;
+      success: boolean;
+      jobsExported: number;
+    }>;
+  } | null>(null);
+  const [exportLoading, setExportLoading] = useState(false);
+  const [lastExportResult, setLastExportResult] = useState<{
+    success: boolean;
+    message: string;
+    exportDate: string;
+    deliveryResults?: {
+      local: boolean;
+      email: boolean;
+      cloud: boolean;
+    };
+  } | null>(null);
+
+  // Load export configuration on mount
+  useEffect(() => {
+    const loadExportStatus = async () => {
+      try {
+        const [config, stats] = await Promise.all([
+          verifyExportConfiguration(),
+          getExportStats()
+        ]);
+        setExportStatus(config);
+        setExportStats(stats);
+      } catch (error) {
+        console.error('Failed to load export status:', error);
+      }
+    };
+    loadExportStatus();
+  }, []);
+
   const runEmergencyAnalysis = async (job: JobDetails) => {
     setAnalysisLoading(true);
     const res = await analyzeJobComplexity(job.notes);
     setAnalysisText(res);
     setAnalysisLoading(false);
+  };
+
+  const handleManualExport = async () => {
+    setExportLoading(true);
+    setLastExportResult(null);
+    
+    try {
+      const result = await triggerDailyExport();
+      setLastExportResult(result);
+      
+      // Refresh stats after export
+      if (result.success) {
+        const stats = await getExportStats();
+        setExportStats(stats);
+        const config = await verifyExportConfiguration();
+        setExportStatus(config);
+      }
+    } catch (error) {
+      setLastExportResult({
+        success: false,
+        message: 'Export failed - check backend connection',
+        exportDate: new Date().toISOString().split('T')[0]
+      });
+    }
+    
+    setExportLoading(false);
   };
 
   return (
@@ -46,7 +122,18 @@ export const Overview: React.FC<OverviewProps> = ({ jobs, onSelectJob }) => {
           </p>
         </div>
         <div className="flex gap-2">
-           <button className="flex-1 md:flex-none bg-white/5 border border-white/10 px-6 py-3 text-[10px] font-black uppercase tracking-widest hover:bg-white/10">DATA_EXP</button>
+           <button 
+             onClick={handleManualExport}
+             disabled={exportLoading}
+             className="flex-1 md:flex-none bg-[#007AFF] border border-[#007AFF] px-6 py-3 text-[10px] font-black uppercase tracking-widest hover:bg-[#007AFF]/80 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+           >
+             {exportLoading ? (
+               <div className="w-3 h-3 border border-white border-t-transparent rounded-full animate-spin"></div>
+             ) : (
+               <Download size={12} />
+             )}
+             {exportLoading ? 'EXPORTING...' : 'DATA_EXP'}
+           </button>
            <button className="flex-1 md:flex-none bg-white text-black px-6 py-3 text-[10px] font-black uppercase tracking-widest hover:invert transition-none">ENTRY_ADD</button>
         </div>
       </div>
@@ -65,6 +152,134 @@ export const Overview: React.FC<OverviewProps> = ({ jobs, onSelectJob }) => {
               <h3 className={`text-[28px] md:text-[36px] font-black tracking-tighter ${stat.color}`}>{stat.value}</h3>
             </div>
           ))}
+        </div>
+
+        {/* Export System Status */}
+        <div className="bg-white text-black p-6 border border-white/10">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-[14px] font-black uppercase tracking-[0.2em] flex items-center gap-2">
+              <HardDrive size={16} />
+              Business Continuity System
+            </h3>
+            <div className="flex items-center gap-2">
+              {exportStatus?.configured ? (
+                <CheckCircle2 size={14} className="text-emerald-600" />
+              ) : (
+                <AlertTriangle size={14} className="text-amber-600" />
+              )}
+              <span className="text-[10px] font-bold uppercase tracking-widest">
+                {exportStatus?.configured ? 'ACTIVE' : 'CONFIG_NEEDED'}
+              </span>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+            {/* Delivery Status */}
+            <div className="space-y-3">
+              <p className="text-[10px] font-black text-black/40 uppercase tracking-[0.2em]">Delivery Paths</p>
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <HardDrive size={12} className="text-black/40" />
+                  <span className="text-[11px] font-bold">Local Storage</span>
+                  <div className="ml-auto">
+                    {exportStatus?.localEnabled ? (
+                      <CheckCircle size={12} className="text-emerald-600" />
+                    ) : (
+                      <XCircle size={12} className="text-red-600" />
+                    )}
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Mail size={12} className="text-black/40" />
+                  <span className="text-[11px] font-bold">Email Delivery</span>
+                  <div className="ml-auto">
+                    {exportStatus?.emailEnabled ? (
+                      <CheckCircle size={12} className="text-emerald-600" />
+                    ) : (
+                      <XCircle size={12} className="text-red-600" />
+                    )}
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Cloud size={12} className="text-black/40" />
+                  <span className="text-[11px] font-bold">Cloud Backup</span>
+                  <div className="ml-auto">
+                    {exportStatus?.cloudEnabled ? (
+                      <CheckCircle size={12} className="text-emerald-600" />
+                    ) : (
+                      <XCircle size={12} className="text-red-600" />
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Export Stats */}
+            <div className="space-y-3">
+              <p className="text-[10px] font-black text-black/40 uppercase tracking-[0.2em]">System Stats</p>
+              <div className="space-y-2">
+                <div className="flex justify-between">
+                  <span className="text-[11px] font-bold">Total Exports</span>
+                  <span className="text-[11px] font-mono font-bold">{exportStats?.totalExports || 0}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-[11px] font-bold">Success Rate</span>
+                  <span className="text-[11px] font-mono font-bold">{exportStats?.successRate || 0}%</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-[11px] font-bold">Last Export</span>
+                  <span className="text-[11px] font-mono font-bold">
+                    {exportStatus?.lastExport ? new Date(exportStatus.lastExport).toLocaleDateString() : 'Never'}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Last Export Result */}
+            <div className="space-y-3">
+              <p className="text-[10px] font-black text-black/40 uppercase tracking-[0.2em]">Last Operation</p>
+              {lastExportResult ? (
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    {lastExportResult.success ? (
+                      <CheckCircle size={12} className="text-emerald-600" />
+                    ) : (
+                      <XCircle size={12} className="text-red-600" />
+                    )}
+                    <span className="text-[11px] font-bold">
+                      {lastExportResult.success ? 'SUCCESS' : 'FAILED'}
+                    </span>
+                  </div>
+                  <p className="text-[10px] text-black/60 leading-tight">{lastExportResult.message}</p>
+                  {lastExportResult.deliveryResults && (
+                    <div className="flex gap-1 mt-2">
+                      <div className={`w-2 h-2 rounded-full ${lastExportResult.deliveryResults.local ? 'bg-emerald-600' : 'bg-red-600'}`} title="Local"></div>
+                      <div className={`w-2 h-2 rounded-full ${lastExportResult.deliveryResults.email ? 'bg-emerald-600' : 'bg-red-600'}`} title="Email"></div>
+                      <div className={`w-2 h-2 rounded-full ${lastExportResult.deliveryResults.cloud ? 'bg-emerald-600' : 'bg-red-600'}`} title="Cloud"></div>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <p className="text-[11px] text-black/40 italic">No recent exports</p>
+              )}
+            </div>
+          </div>
+
+          {/* Configuration Notice */}
+          {!exportStatus?.configured && (
+            <div className="bg-amber-50 border border-amber-200 p-4">
+              <div className="flex items-start gap-3">
+                <AlertTriangle size={16} className="text-amber-600 mt-0.5" />
+                <div>
+                  <p className="text-[11px] font-bold text-amber-800 uppercase tracking-tight">Configuration Required</p>
+                  <p className="text-[10px] text-amber-700 mt-1">
+                    Business continuity system needs SMTP, cloud storage, and local paths configured. 
+                    Check .env configuration and restart services.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="grid grid-cols-1 xl:grid-cols-12 gap-10">
